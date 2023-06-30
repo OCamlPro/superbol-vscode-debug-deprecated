@@ -10,16 +10,10 @@ import {parseExpression, cleanRawValue} from "./functions";
 const nativePath = {
     resolve: function (...args: string[]): string {
         const nat = nativePathFromPath.resolve(...args);
-        if (process.platform === "win32" && this.cobcpath === "docker" && this.gdbpath === "docker") {
-            return nat.replace(/.*:/, s => "/" + s.toLowerCase().replace(":", "")).replace(/\\/g, "/");
-        }
         return nat;
     },
     dirname: function (path: string): string {
         const nat = nativePathFromPath.dirname(path);
-        if (process.platform === "win32" && this.cobcpath === "docker" && this.gdbpath === "docker") {
-            return nat.replace(/.*:/, s => "/" + s.toLowerCase().replace(":", "")).replace(/\\/g, "/");
-        }
         return nat;
     },
     basename: function (path: string): string {
@@ -87,9 +81,6 @@ export class MI2 extends EventEmitter implements IDebugger {
     }
 
     load(cwd: string, target: string, targetargs: string, group: string[]): Thenable<any> {
-        if (!nativePath.isAbsolute(target) || (this.cobcpath === "docker" && this.gdbpath === "docker")) {
-            target = nativePath.resolve(cwd, target);
-        }
         group.forEach(e => {
             e = nativePath.join(cwd, e);
         });
@@ -107,13 +98,13 @@ export class MI2 extends EventEmitter implements IDebugger {
                 this.process = ChildProcess.spawn(this.cobcpath, args, {cwd: cwd, env: this.procEnv});
                 this.process.stderr.on("data", ((data) => {
                     this.log("stderr", data);
-                }).bind(this));
+                }));
                 this.process.stdout.on("data", ((data) => {
                     this.log("stdout", data);
-                }).bind(this));
+                }));
                 this.process.on("exit", (() => {
                     this.emit("quit");
-                }).bind(this));
+                }));
                 return;
             }
 
@@ -164,7 +155,7 @@ export class MI2 extends EventEmitter implements IDebugger {
                 target = target.split('.').slice(0, -1).join('.');
                 // FIXME: the following should prefix "cobcrun.exe" if in "module mode", see #13
                 // FIXME: if we need this code twice then add a comment why, otherwise move to a new function
-                if (process.platform === "win32" && this.cobcpath !== "docker" && this.gdbpath !== "docker") {
+                if (process.platform === "win32") {
                     target = target + '.exe';
                 }
 
@@ -182,7 +173,7 @@ export class MI2 extends EventEmitter implements IDebugger {
                 const promises = this.initCommands(target, targetargs, cwd);
                 Promise.all(promises).then(() => {
                     this.emit("debug-ready");
-                    resolve();
+                    resolve(undefined);
                 }, reject);
             });
         });
@@ -254,7 +245,7 @@ export class MI2 extends EventEmitter implements IDebugger {
                 const promises = this.initCommands(target, targetargs, cwd);
                 Promise.all(promises).then(() => {
                     this.emit("debug-ready");
-                    resolve();
+                    resolve(undefined);
                 }, reject);
             });
         });
@@ -461,7 +452,7 @@ export class MI2 extends EventEmitter implements IDebugger {
 
                 this.sendCommand(command).then((info) => {
                     if (info.resultRecords.resultClass == expectingResultClass) {
-                        resolve();
+                        resolve(undefined);
                     } else {
                         reject();
                     }
@@ -667,7 +658,8 @@ export class MI2 extends EventEmitter implements IDebugger {
             this.sendCommand("break-insert -f " + location).then((result) => {
                 if (result.resultRecords.resultClass == "done") {
                     const bkptNum = parseInt(result.result("bkpt.number"));
-                    const map = this.map.getLineCobol(result.result("bkpt.file"), parseInt(result.result("bkpt.line")));
+                    const bkptlocation = (<string>result.result("bkpt.original-location")).split(':');
+                    const map = this.map.getLineCobol(bkptlocation[0], parseInt(bkptlocation[1]));
                     const newBrk = {
                         file: map.fileCobol,
                         line: map.lineCobol,
