@@ -160,16 +160,10 @@ export class MI2 extends EventEmitter implements IDebugger {
                 }
 
                 this.process = ChildProcess.spawn(this.gdbpath, this.gdbArgs, {cwd: cwd, env: this.procEnv});
-                this.process.stdout.on("data", this.stdout.bind(this));
-                this.process.stderr.on("data", ((data) => {
-                    this.log("stderr", data);
-                }).bind(this));
-                this.process.on("exit", (() => {
-                    this.emit("quit");
-                }).bind(this));
-                this.process.on("error", ((err) => {
-                    this.emit("launcherror", err);
-                }).bind(this));
+                this.process.stdout.on("data", (data) => this.stdout(data));
+                this.process.stderr.on("data", (data) => { this.log("stderr", data); });
+                this.process.on("exit", () => { this.emit("quit"); });
+                this.process.on("error", (err) => { this.emit("launcherror", err); });
                 const promises = this.initCommands(target, targetargs, cwd);
                 Promise.all(promises).then(() => {
                     this.emit("debug-ready");
@@ -232,16 +226,10 @@ export class MI2 extends EventEmitter implements IDebugger {
                 }
 
                 this.process = ChildProcess.spawn(this.gdbpath, this.gdbArgs, {cwd: cwd, env: this.procEnv});
-                this.process.stdout.on("data", this.stdout.bind(this));
-                this.process.stderr.on("data", ((data) => {
-                    this.log("stderr", data);
-                }).bind(this));
-                this.process.on("exit", (() => {
-                    this.emit("quit");
-                }).bind(this));
-                this.process.on("error", ((err) => {
-                    this.emit("launcherror", err);
-                }).bind(this));
+                this.process.stdout.on("data", (data) => this.stdout(data));
+                this.process.stderr.on("data", (data) => { this.log("stderr", data); });
+                this.process.on("exit", () => { this.emit("quit"); });
+                this.process.on("error", (err) => { this.emit("launcherror", err); });
                 const promises = this.initCommands(target, targetargs, cwd);
                 Promise.all(promises).then(() => {
                     this.emit("debug-ready");

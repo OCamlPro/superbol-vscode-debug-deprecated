@@ -84,18 +84,18 @@ export class GDBDebugSession extends DebugSession {
         this.attached = false;
 
         this.miDebugger = new MI2(args.gdbpath, args.gdbargs, args.cobcpath, args.cobcargs, args.env, args.verbose, args.noDebug);
-        this.miDebugger.on("launcherror", this.launchError.bind(this));
-        this.miDebugger.on("quit", this.quitEvent.bind(this));
-        this.miDebugger.on("exited-normally", this.quitEvent.bind(this));
-        this.miDebugger.on("stopped", this.stopEvent.bind(this));
-        this.miDebugger.on("msg", this.handleMsg.bind(this));
-        this.miDebugger.on("breakpoint", this.handleBreakpoint.bind(this));
-        this.miDebugger.on("step-end", this.handleBreak.bind(this));
-        this.miDebugger.on("step-out-end", this.handleBreak.bind(this));
-        this.miDebugger.on("step-other", this.handleBreak.bind(this));
-        this.miDebugger.on("signal-stop", this.handlePause.bind(this));
-        this.miDebugger.on("thread-created", this.threadCreatedEvent.bind(this));
-        this.miDebugger.on("thread-exited", this.threadExitedEvent.bind(this));
+        this.miDebugger.on("launcherror", (err) => this.launchError(err));
+        this.miDebugger.on("quit", () => this.quitEvent());
+        this.miDebugger.on("exited-normally", () => this.quitEvent());
+        this.miDebugger.on("stopped", (info: MINode) => this.stopEvent(info));
+        this.miDebugger.on("msg", (type: string, message:string) => this.handleMsg(type, message));
+        this.miDebugger.on("breakpoint", (info: MINode) => this.handleBreakpoint(info));
+        this.miDebugger.on("step-end", (info?: MINode) => this.handleBreak(info));
+        this.miDebugger.on("step-out-end", (info?: MINode) => this.handleBreak(info));
+        this.miDebugger.on("step-other", (info?: MINode) => this.handleBreak(info));
+        this.miDebugger.on("signal-stop", (info: MINode) => this.handlePause(info));
+        this.miDebugger.on("thread-created", (info: MINode) => this.threadCreatedEvent(info));
+        this.miDebugger.on("thread-exited", (info: MINode) => this.threadExitedEvent(info));
         this.sendEvent(new InitializedEvent());
         this.quit = false;
         this.needContinue = false;
@@ -130,18 +130,18 @@ export class GDBDebugSession extends DebugSession {
         this.started = false;
 
         this.miDebugger = new MI2(args.gdbpath, args.gdbargs, args.cobcpath, args.cobcargs, args.env, args.verbose, false);
-        this.miDebugger.on("launcherror", this.launchError.bind(this));
-        this.miDebugger.on("quit", this.quitEvent.bind(this));
-        this.miDebugger.on("exited-normally", this.quitEvent.bind(this));
-        this.miDebugger.on("stopped", this.stopEvent.bind(this));
-        this.miDebugger.on("msg", this.handleMsg.bind(this));
-        this.miDebugger.on("breakpoint", this.handleBreakpoint.bind(this));
-        this.miDebugger.on("step-end", this.handleBreak.bind(this));
-        this.miDebugger.on("step-out-end", this.handleBreak.bind(this));
-        this.miDebugger.on("step-other", this.handleBreak.bind(this));
-        this.miDebugger.on("signal-stop", this.handlePause.bind(this));
-        this.miDebugger.on("thread-created", this.threadCreatedEvent.bind(this));
-        this.miDebugger.on("thread-exited", this.threadExitedEvent.bind(this));
+        this.miDebugger.on("launcherror", (err) => this.launchError(err));
+        this.miDebugger.on("quit", () => this.quitEvent());
+        this.miDebugger.on("exited-normally", () => this.quitEvent());
+        this.miDebugger.on("stopped", (info: MINode) => this.stopEvent(info));
+        this.miDebugger.on("msg", (type: string, message:string) => this.handleMsg(type, message));
+        this.miDebugger.on("breakpoint", (info: MINode) => this.handleBreakpoint(info));
+        this.miDebugger.on("step-end", (info?: MINode) => this.handleBreak(info));
+        this.miDebugger.on("step-out-end", (info?: MINode) => this.handleBreak(info));
+        this.miDebugger.on("step-other", (info?: MINode) => this.handleBreak(info));
+        this.miDebugger.on("signal-stop", (info: MINode) => this.handlePause(info));
+        this.miDebugger.on("thread-created", (info: MINode) => this.threadCreatedEvent(info));
+        this.miDebugger.on("thread-exited", (info: MINode) => this.threadExitedEvent(info));
         this.sendEvent(new InitializedEvent());
         this.quit = false;
         this.needContinue = true;
@@ -264,7 +264,7 @@ export class GDBDebugSession extends DebugSession {
     }
 
     protected setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments): void {
-        const cb = (() => {
+        const cb = () => {
             this.debugReady = true;
             const all = [];
             args.breakpoints.forEach(brk => {
@@ -287,7 +287,7 @@ export class GDBDebugSession extends DebugSession {
             }, msg => {
                 this.sendErrorResponse(response, 10, msg.toString());
             });
-        }).bind(this);
+        };
         if (this.debugReady)
             cb();
         else
@@ -295,7 +295,7 @@ export class GDBDebugSession extends DebugSession {
     }
 
     protected setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments): void {
-        const cb = (() => {
+        const cb = () => {
             this.debugReady = true;
             this.miDebugger.clearBreakPoints().then(() => {
                 const path = args.source.path;
@@ -323,7 +323,7 @@ export class GDBDebugSession extends DebugSession {
             }, msg => {
                 this.sendErrorResponse(response, 9, msg.toString());
             });
-        }).bind(this);
+        };
         if (this.debugReady)
             cb();
         else
