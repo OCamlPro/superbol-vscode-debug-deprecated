@@ -39,11 +39,11 @@ function getGcovBinary() {
 export async function isGcovCompatible() {
   const gcovBinary = getGcovBinary();
   const command = `${gcovBinary} --help`;
-  return new Promise<boolean>((resolve, reject) => {
-    child_process.exec(command, (err, stdout, stderr) => {
+  return new Promise<boolean>((resolve, _reject) => {
+    child_process.exec(command, (err, stdout, _stderr) => {
       if (err) {
-        vscode.window.showErrorMessage(
-          `Error while trying to run gcov, try to change the "Gcov Binary" setting. ${err}`
+        void vscode.window.showErrorMessage(
+          `Error while trying to run gcov, try to change the "Gcov Binary" setting. ${err.message}`
         );
         resolve(false);
         return;
@@ -52,7 +52,7 @@ export async function isGcovCompatible() {
       const supportsRequiredArgs =
         gcovOutput.includes("--json-format") && gcovOutput.includes("--stdout");
       if (!supportsRequiredArgs) {
-        vscode.window.showErrorMessage(
+        void vscode.window.showErrorMessage(
           `The gcov version is not compatible. Please use at least version 9.`
         );
       }
@@ -76,9 +76,9 @@ export async function loadGcovData(paths: string[]): Promise<GcovData[]> {
     child_process.exec(
       command,
       { maxBuffer: 256 * 1024 * 1024 },
-      (err, stdout, stderr) => {
+      (err, stdout, _stderr) => {
         if (err) {
-          console.error(`exec error: ${err}`);
+          console.error(`exec error: ${err.message}`);
           reject();
           return;
         }

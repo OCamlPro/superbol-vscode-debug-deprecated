@@ -60,10 +60,15 @@ function parseString(str: string): string {
     return ret.slice(0, bufIndex).toString("utf8");
 }
 
+export type ResultRecords = {
+  resultClass: string;
+  results: [string, unknown][]
+}
+
 export class MINode implements MIInfo {
     token: number;
     outOfBandRecord: { isStream: boolean, type: string, asyncClass: string, output: [string, any][], content: string }[];
-    resultRecords: { resultClass: string, results: [string, any][] };
+    resultRecords: ResultRecords;
 
     constructor(token: number, info: { isStream: boolean, type: string, asyncClass: string, output: [string, any][], content: string }[], result: { resultClass: string, results: [string, any][] }) {
         this.token = token;
