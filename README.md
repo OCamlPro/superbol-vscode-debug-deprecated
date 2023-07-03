@@ -19,6 +19,18 @@
 
 An extension to debug or execute GnuCOBOL code. Forked from [COBOL Degub](https://github.com/OlegKunitsyn/gnucobol-debug).
 
+- [Features](#features)
+- [Requirements](#requirements)
+  - [Binaries](#binaries)
+- [Usage](#usage)
+- [Code coverage](#code-coverage)
+- [Attaching to a running process](#attaching-to-a-running-process)
+  - [Local Process](#local-process)
+  - [Remote Debugger (GDBServer)](#remote-debugger-gdbserver)
+- [Documentation](#documentation)
+- [Troubleshooting](#troubleshooting)
+- [Development](#development)
+
 ### Features
 * Setting breakpoints
 * Continue, Stop, Restart, Step Over, Step Into, Step Out
@@ -128,6 +140,10 @@ Here's an example:
 ```
 
 Your contribution is always welcome!
+
+### Documentation
+
+For a more in depth documentation please check the [Superbol Documentation](https://ocamlpro.com/superbol/)
 
 ### Troubleshooting
 Add `verbose` property to your `launch.json` and start debugging session. In `DEBUG CONSOLE` you will see complete communication log between `gdb` and VS Code. Here's an example:
