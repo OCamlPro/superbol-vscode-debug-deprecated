@@ -1,6 +1,6 @@
 {
-	"name": "gnucobol-debug",
-	"displayName": "COBOL debugger",
+	"name": "superbol-vscode-debug",
+	"displayName": "Superbol debugger",
 	"description": "Debug or execute COBOL code. No mainframe required.",
 	"keywords": [
 		"cobol",
@@ -10,7 +10,17 @@
 		"code coverage"
 	],
 	"version": "2.31.37",
-	"publisher": "OlegKunitsyn",
+	"publisher": "OCamlPro SAS",
+    "contributors": [
+        {
+            "name": "Emilien Lemaire",
+            "email": "emilien.lemaire@ocamlpro.com"
+        },
+        {
+            "name": "Olegs Kunicins",
+            "email": "olegs.kunicins@gmail.com"
+        }
+    ],
 	"license": "GPL-3.0",
 	"icon": "icon.png",
 	"engines": {
@@ -25,7 +35,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/OlegKunitsyn/gnucobol-debug.git"
+		"url": "https://github.com/OCamlPro/superbol-vscode-debug.git"
 	},
 	"capabilities": {
 		"untrustedWorkspaces": {
@@ -36,21 +46,6 @@
 		"breakpoints": [
 			{
 				"language": "cobol"
-			},
-			{
-				"language": "COBOL"
-			},
-			{
-				"language": "ACUCOBOL"
-			},
-			{
-				"language": "OpenCOBOL"
-			},
-			{
-				"language": "GnuCOBOL"
-			},
-			{
-				"language": "entcobol"
 			}
 		],
 		"debuggers": [
@@ -218,7 +213,7 @@
 		],
 		"configuration": {
 			"type": "object",
-			"title": "COBOL Debugger",
+			"title": "Superbol Debugger",
 			"properties": {
 				"Cobol_Debugger.display_variable_attributes": {
 					"type": "boolean",
