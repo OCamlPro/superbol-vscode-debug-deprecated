@@ -25,12 +25,12 @@ export class MI2 extends EventEmitter implements IDebugger {
   private gcovFiles: Set<string> = new Set<string>();
   public procEnv: NodeJS.ProcessEnv;
   private currentToken = 1;
-  private handlers: { [index: number]: (info: MINode) => unknown } = {};
+  private handlers: { [index: number]: (_: MINode) => unknown } = {};
   private breakpoints: Map<Breakpoint, number> = new Map();
   private buffer: string;
   private errbuf: string;
   private process: ChildProcess.ChildProcess;
-  private lastStepCommand: Function;
+  private lastStepCommand: () => Thenable<boolean>;
   private hasCobGetFieldStringFunction = true;
   private hasCobPutFieldStringFunction = true;
 
@@ -41,7 +41,7 @@ export class MI2 extends EventEmitter implements IDebugger {
     public cobcArgs: string[],
     procEnv: NodeJS.ProcessEnv,
     public verbose: boolean,
-    public noDebug: boolean)
+    public noDebug: boolean | null)
   {
     super();
     if (procEnv) {
@@ -74,7 +74,7 @@ export class MI2 extends EventEmitter implements IDebugger {
       }
 
       if (this.noDebug) {
-        const args = this.cobcArgs
+        const args = (this.cobcArgs || [])
         .concat([target])
         .concat(group)
         .concat(['-job=' + targetargs]);
@@ -91,7 +91,7 @@ export class MI2 extends EventEmitter implements IDebugger {
         return;
       }
 
-      const args = this.cobcArgs.concat([
+      const args = (this.cobcArgs || []).concat([
         '-g',                //enable debugger
         '-fsource-location', //generate source location code
         '-ftraceall',        // generate trace code
@@ -172,7 +172,7 @@ export class MI2 extends EventEmitter implements IDebugger {
         reject(new Error("cwd does not exist."));
       }
 
-      const args = this.cobcArgs.concat([
+      const args = (this.cobcArgs || []).concat([
         '-g',
         '-fsource-location',
         '-ftraceall',
@@ -348,7 +348,7 @@ export class MI2 extends EventEmitter implements IDebugger {
                       <string>parsed.record('frame.fullname'),
                       parseInt(<string>parsed.record('frame.line'))))
                     {
-                      this.lastStepCommand();
+                      void this.lastStepCommand().then();
                     } else {
                       this.emit("step-end", parsed);
                     }
@@ -357,7 +357,7 @@ export class MI2 extends EventEmitter implements IDebugger {
                       <string>parsed.record('frame.fullname'),
                       parseInt(<string>parsed.record('frame.line'))))
                     {
-                      this.lastStepCommand();
+                      void this.lastStepCommand();
                     } else {
                       this.emit("step-out-end", parsed);
                     }
@@ -437,7 +437,7 @@ export class MI2 extends EventEmitter implements IDebugger {
 
         this.sendCommand(command).then((info) => {
           if (info.resultRecords.resultClass == expectingResultClass) {
-            resolve(undefined);
+            resolve(true);
           } else {
             reject();
           }
@@ -448,23 +448,27 @@ export class MI2 extends EventEmitter implements IDebugger {
 
   stop() {
     const proc = this.process;
-    const to = setTimeout(() => {
-      process.kill(-proc.pid);
-    }, 1000);
-    this.process.on("exit", function (_code) {
-      clearTimeout(to);
-    });
+    if (proc) {
+      const to = setTimeout(() => {
+        process.kill(-proc.pid);
+      }, 1000);
+      this.process.on("exit", function (_code) {
+        clearTimeout(to);
+      });
+    }
     void this.sendCommand("gdb-exit");
   }
 
   detach() {
     const proc = this.process;
-    const to = setTimeout(() => {
-      process.kill(-proc.pid);
-    }, 1000);
-    this.process.on("exit", function (_code) {
-      clearTimeout(to);
-    });
+    if (proc) {
+      const to = setTimeout(() => {
+        process.kill(-proc.pid);
+      }, 1000);
+      this.process.on("exit", function (_code) {
+        clearTimeout(to);
+      });
+    }
     void this.sendCommand("target-detach");
   }
 

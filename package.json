@@ -51,6 +51,7 @@
 		"debuggers": [
 			{
 				"type": "gdb",
+				"languages": ["cobol", "COBOL"],
 				"program": "./out/src/gdb.js",
 				"runtime": "node",
 				"label": "COBOL debugger",
@@ -179,7 +180,7 @@
 				},
 				"initialConfigurations": [
 					{
-						"name": "COBOL debugger",
+						"name": "Superbol debugger",
 						"type": "gdb",
 						"request": "launch",
 						"cobcargs": [
@@ -187,59 +188,69 @@
 							"-x"
 						],
 						"coverage": true
+					}
+				],
+				"configurationSnippets": [
+					{
+						"label": "Superbol: debug launch",
+						"description": "New Superbol launch request",
+						"body": {
+							"type": "gdb",
+							"request": "launch",
+							"name": "${2: Superbol debugger}"
+						}
 					},
 					{
-						"name": "COBOL debugger attach local",
-						"type": "gdb",
-						"request": "attach",
-						"cobcargs": [
-							"-free",
-							"-x"
-						],
-						"pid": "${input:pid}"
+						"label": "Superbol: debug attach local",
+						"description": "New Superbol attach local request",
+						"body": {
+							"type": "gdb",
+							"request": "attach",
+							"name": "${2: Superbol debugger}",
+							"pid": "${3:0}"
+						}
 					},
 					{
-						"name": "COBOL debugger attach remote",
-						"type": "gdb",
-						"request": "attach",
-						"cobcargs": [
-							"-free",
-							"-x"
-						],
-						"remoteDebugger": "${input:remoteDebugger}"
+						"label": "Superbol: debug attach remote",
+						"description": "New Superbol attach remote request",
+						"body": {
+							"type": "gdb",
+							"request": "attach",
+							"name": "${2: Superbol debugger}",
+							"remoteDebugger": "${3:host:port}"
+						}
 					}
 				]
 			}
 		],
 		"configuration": {
-			"type": "object",
 			"title": "Superbol Debugger",
 			"properties": {
-				"Cobol_Debugger.display_variable_attributes": {
+				"superbol_debugger.display_variable_attributes": {
 					"type": "boolean",
 					"default": false,
 					"description": "Displaying Data Storages and Fields attributes(e.g. size of Alphanumerics or digits and scale of numerics).",
 					"scope": "resource"
 				},
-				"Cobol_Debugger.cwd": {
+				"superbol_debugger.cwd": {
 					"type": "string",
 					"default": "${workspaceRoot}",
 					"description": "Path to project",
 					"scope": "application"
 				},
-				"Cobol_Debugger.target": {
+				"superbol_debugger.target": {
 					"type": "string",
 					"description": "Path to source code",
 					"default": "${file}",
 					"scope": "application"
 				},
-				"Cobol_Debugger.gdbpath": {
+				"superbol_debugger.gdbpath": {
 					"type": "string",
 					"description": "Path to gdb",
 					"default": "gdb",
 					"scope": "application"
 				},
-				"Cobol_Debugger.cobcpath": {
+				"superbol_debugger.cobcpath": {
 					"type": "string",
 					"description": "Path to cobc",
 					"default": "cobc",

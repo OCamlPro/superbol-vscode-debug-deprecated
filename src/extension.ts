@@ -7,14 +7,19 @@ import {DebuggerSettings} from "./settings";
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.debug.registerDebugConfigurationProvider('gdb', new GdbConfigurationProvider()),
-        vscode.debug.registerDebugAdapterDescriptorFactory('gdb', new GdbAdapterDescriptorFactory(new CoverageStatus(), new GDBDebugSession())),
-    );
+        vscode.debug.
+          registerDebugAdapterDescriptorFactory(
+            'gdb',
+            new GdbAdapterDescriptorFactory(new CoverageStatus(), new GDBDebugSession())));
 }
 
-export function deactivate() {}
-
 class GdbConfigurationProvider implements vscode.DebugConfigurationProvider {
-    resolveDebugConfiguration(_folder: vscode.WorkspaceFolder | undefined, config: vscode.DebugConfiguration, _token?: vscode.CancellationToken): vscode.ProviderResult<vscode.DebugConfiguration> {
+    resolveDebugConfiguration(
+      _folder: vscode.WorkspaceFolder | undefined,
+      config: vscode.DebugConfiguration,
+      _token?: vscode.CancellationToken):
+        vscode.ProviderResult<vscode.DebugConfiguration>
+    {
         config.gdbargs = ["-q", "--interpreter=mi2"];
         const settings = new DebuggerSettings();
         if (config.cwd === undefined) {
@@ -36,6 +41,50 @@ class GdbConfigurationProvider implements vscode.DebugConfigurationProvider {
             config.cobcpath = settings.cobcpath;
         }
         return config;
+    }
+
+    provideDebugConfigurations(
+      _folder: vscode.WorkspaceFolder,
+      _token?: vscode.CancellationToken):
+        vscode.ProviderResult<vscode.DebugConfiguration[]> {
+        const launchConfigDefault: vscode.DebugConfiguration = {
+          name: "Superbol debugger",
+          type: "gdb",
+          request: "launch",
+          cobcargs: [
+            "-free",
+            "-x"
+          ],
+          coverage: true
+        };
+
+        const attachLocalConfiguration: vscode.DebugConfiguration = {
+          name: "Superbol debugger attach local",
+          type: "gdb",
+          request: "attach",
+          cobcargs: [
+            "-free",
+            "-x"
+          ],
+          pid: "${input:pid}"
+        };
+
+        const attachRemoteConfiguration: vscode.DebugConfiguration = {
+          name: "Superbol debugger attach remote",
+          type: "gdb",
+          request: "attach",
+          cobcargs: [
+            "-free",
+            "-x"
+          ],
+          remoteDebugger: "${input:remoteDebugger}"
+        }
+
+        return [
+          launchConfigDefault,
+          attachLocalConfiguration,
+          attachRemoteConfiguration
+        ];
     }
 }
 
